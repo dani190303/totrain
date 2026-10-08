@@ -1,0 +1,2317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepsDB — Tu Diario de Entrenamiento Personal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-base: #0b0f19;
+            --bg-surface: rgba(17, 24, 39, 0.6);
+            --bg-card: rgba(30, 41, 59, 0.45);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            
+            --color-primary: #6366f1; /* Indigo */
+            --color-primary-glow: rgba(99, 102, 241, 0.15);
+            --color-success: #10b981; /* Esmeralda */
+            --color-success-glow: rgba(16, 185, 129, 0.15);
+            --color-accent: #06b6d4; /* Cyan */
+            --color-danger: #ef4444; /* Rojo */
+            
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-dark: #6b7280;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --sidebar-width: 320px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .app-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* --- BARRA LATERAL (SIDEBAR) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(10, 15, 30, 0.8);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            backdrop-filter: blur(20px);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .logo-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #9ca3af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 0.25rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 0.5rem;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-tab-btn.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- LISTADO DE SESIONES EN SIDEBAR --- */
+        .sessions-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .sessions-list-header h3 {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .add-session-btn {
+            background: var(--color-primary-glow);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-session-btn:hover {
+            background: var(--color-primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .sessions-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            padding-right: 0.25rem;
+        }
+
+        /* Estilo Scrollbar */
+        .sessions-scroll-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sessions-scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sessions-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .session-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: background 0.2s;
+        }
+
+        .session-item:hover {
+            border-color: var(--border-hover);
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .session-item.selected {
+            background: rgba(99, 102, 241, 0.06);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .session-item.selected::before {
+            background: var(--color-primary);
+        }
+
+        .session-item-date {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .session-item-summary {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- AREA PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* PANTALLAS (VISTAS) */
+        .view-section {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .view-section.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- DETALLE DE SESION (PANTALLA DE TRABAJO PRINCIPAL) --- */
+        .session-detail-header {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .session-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .session-title-container h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .session-actions-top {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-color: var(--border-hover);
+        }
+
+        .icon-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .session-notes-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            width: 100%;
+            outline: none;
+            resize: none;
+            transition: border-color 0.2s;
+        }
+
+        .session-notes-box:focus {
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* TARJETAS DE EJERCICIOS DENTRO DEL DETALLE */
+        .session-exercises-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+
+        .session-exercise-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .session-exercise-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .exercise-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .exercise-card-name {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .exercise-card-name:hover {
+            color: var(--color-primary);
+        }
+
+        .exercise-card-muscle {
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            color: var(--text-muted);
+            width: fit-content;
+        }
+
+        .exercise-card-series-inline {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .series-rep-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #c7d2fe;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .series-divider {
+            color: var(--text-dark);
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .exercise-card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* SECCIÓN AGREGAR EJERCICIO */
+        .add-exercise-section {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .trigger-add-ex-btn {
+            background: transparent;
+            border: 2px dashed var(--border-color);
+            color: var(--text-muted);
+            padding: 1.5rem;
+            border-radius: 16px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.25s;
+        }
+
+        .trigger-add-ex-btn:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            color: white;
+            background: rgba(99, 102, 241, 0.02);
+        }
+
+        /* --- CATÁLOGO DE EJERCICIOS (PANTALLA SECUNDARIA) --- */
+        .exercises-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .exercises-view-header h2 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .catalog-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .catalog-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.05);
+        }
+
+        .catalog-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .catalog-card-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .catalog-card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* --- MODALES --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(7, 9, 15, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1.5rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #111827;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .form-group label {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--color-primary);
+        }
+
+        .form-input option {
+            background-color: #111827;
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-muted {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .btn-muted:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        /* --- CONSTRUCTOR DE SERIES INTERACTIVO (DENTRO DEL MODAL) --- */
+        .series-builder {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-top: 0.5rem;
+        }
+
+        .series-builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .series-builder-header h4 {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .series-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        .series-row-label {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: 0.95rem;
+        }
+
+        .series-counter {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .counter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.15s;
+        }
+
+        .counter-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .counter-input {
+            width: 50px;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        .add-series-row-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--border-color);
+            color: var(--text-muted);
+            padding: 0.6rem;
+            border-radius: 10px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .add-series-row-btn:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- NOTIFICACIONES (TOAST) --- */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-left: 4px solid var(--color-success);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* --- PANTALLA DE BIENVENIDA / VACÍA --- */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            text-align: center;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .empty-state-icon {
+            background: rgba(255, 255, 255, 0.03);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-state h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            max-width: 400px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* CONTENEDOR GRÁFICO EVOLUCIÓN */
+        .chart-container-wrapper {
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-metrics-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .metric-toggle-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .metric-toggle-btn.active {
+            background: var(--color-primary-glow);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- --- BARRA LATERAL (SIDEBAR) --- -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i data-lucide="dumbbell"></i>
+                </div>
+                <div class="logo-title">REPS.DB</div>
+            </div>
+
+            <!-- Tabs de Navegación -->
+            <div class="nav-tabs">
+                <button class="nav-tab-btn active" onclick="switchTab('sessions')">
+                    <i data-lucide="calendar"></i> Sesiones
+                </button>
+                <button class="nav-tab-btn" onclick="switchTab('exercises')">
+                    <i data-lucide="list"></i> Ejercicios
+                </button>
+            </div>
+
+            <!-- Listado de Sesiones / Días -->
+            <div class="sessions-list-header">
+                <h3>Historial</h3>
+            </div>
+
+            <button class="add-session-btn" onclick="openCreateSessionModal()">
+                <i data-lucide="plus-circle"></i> + Nueva sesión
+            </button>
+
+            <div class="sessions-scroll-area" id="sessions-sidebar-list">
+                <!-- Se inyectará con JavaScript -->
+            </div>
+        </aside>
+
+        <!-- --- AREA DE TRABAJO PRINCIPAL --- -->
+        <main class="main-content">
+            
+            <!-- VISTA: SESIONES (PANTALLA DE TRABAJO PRINCIPAL) -->
+            <section id="sessions-view" class="view-section active">
+                <!-- Estado Cargando / Vacío -->
+                <div id="session-detail-container">
+                    <!-- Se inyectará dinámicamente -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i data-lucide="calendar-heart" style="width: 40px; height: 40px;"></i>
+                        </div>
+                        <h2>Bienvenido a RepsDB</h2>
+                        <p>Selecciona una sesión de entrenamiento en el historial lateral para ver los detalles, o crea una nueva para registrar tu rutina de hoy.</p>
+                        <button class="btn btn-primary" onclick="openCreateSessionModal()">
+                            <i data-lucide="plus"></i> Crear mi primera sesión
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA: CATALOGO DE EJERCICIOS -->
+            <section id="exercises-view" class="view-section">
+                <div class="exercises-view-header">
+                    <h2>Catálogo de Ejercicios</h2>
+                    <button class="btn btn-primary" onclick="openCreateExerciseModal()">
+                        <i data-lucide="plus"></i> Nuevo Ejercicio
+                    </button>
+                </div>
+                
+                <div class="catalog-grid" id="exercises-catalog-grid">
+                    <!-- Se inyecta dinámicamente con JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- --- MODALES --- -->
+
+    <!-- Modal: Crear/Editar Sesión -->
+    <div class="modal-overlay" id="session-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="session-modal-title">Nueva Sesión de Entrenamiento</h3>
+                <button class="icon-btn" onclick="closeModal('session-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="session-form" onsubmit="saveSession(event)">
+                <input type="hidden" id="session-form-id">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="session-date">Fecha de Entrenamiento</label>
+                    <input type="date" id="session-date" class="form-input" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="session-notes">Notas (Opcional)</label>
+                    <textarea id="session-notes" class="form-input" placeholder="Ej. Sentimiento general, clima, peso corporal..." rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-muted" onclick="closeModal('session-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Día</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar/Editar Ejercicio en Sesión (Series Builder) -->
+    <div class="modal-overlay" id="add-exercise-to-session-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Ejercicio en la Sesión</h3>
+                <button class="icon-btn" onclick="closeModal('add-exercise-to-session-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="add-ex-session-form" onsubmit="saveSeriesForExercise(event)">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="session-ex-dropdown">Selecciona Ejercicio</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <select id="session-ex-dropdown" class="form-input" required style="flex: 1;">
+                            <!-- Inyectado dinámicamente -->
+                        </select>
+                        <button type="button" class="btn btn-muted" id="btn-quick-create-ex" onclick="toggleQuickExerciseForm()" style="padding: 0.75rem; white-space: nowrap;">
+                            <i data-lucide="plus"></i> Nuevo
+                        </button>
+                        <button type="button" class="btn btn-muted" id="btn-quick-edit-ex" onclick="openEditExerciseFromSession()" style="padding: 0.75rem; display: none;" title="Editar definición del ejercicio">
+                            <i data-lucide="edit-2"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Formulario Rápido para Nuevo Ejercicio -->
+                <div id="quick-exercise-form-container" style="display: none; flex-direction: column; gap: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-color); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
+                    <h4 style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; color: var(--color-accent);">Nuevo Ejercicio Rápido</h4>
+                    <div class="form-group">
+                        <label for="quick-ex-name">Nombre del Ejercicio</label>
+                        <input type="text" id="quick-ex-name" class="form-input" placeholder="Ej. Sentadillas">
+                    </div>
+                    <div class="form-group">
+                        <label for="quick-ex-muscle">Grupo Muscular</label>
+                        <input type="text" id="quick-ex-muscle" class="form-input" placeholder="Ej. Pierna">
+                    </div>
+                    <div class="form-group">
+                        <label for="quick-ex-desc">Descripción (Opcional)</label>
+                        <textarea id="quick-ex-desc" class="form-input" placeholder="Breve nota..." rows="2"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.25rem;">
+                        <button type="button" class="btn btn-muted" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="toggleQuickExerciseForm()">Cancelar</button>
+                        <button type="button" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="saveQuickExercise()">Crear y Seleccionar</button>
+                    </div>
+                </div>
+                
+                <div class="series-builder">
+                    <div class="series-builder-header">
+                        <h4>Series Registradas</h4>
+                        <button type="button" class="btn btn-muted" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;" onclick="addSeriesRow(null)">
+                            <i data-lucide="plus" style="width: 14px; height: 14px;"></i> + Serie
+                        </button>
+                    </div>
+                    
+                    <div id="series-rows-container" style="display: flex; flex-direction: column; gap: 0.6rem; max-height: 250px; overflow-y: auto;">
+                        <!-- Filas de series inyectadas por JS -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-muted" onclick="closeModal('add-exercise-to-session-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Ejercicio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Crear/Editar Ejercicio Catálogo -->
+    <div class="modal-overlay" id="exercise-catalog-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="exercise-modal-title">Nuevo Ejercicio</h3>
+                <button class="icon-btn" onclick="closeModal('exercise-catalog-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="exercise-form" onsubmit="saveExercise(event)">
+                <input type="hidden" id="exercise-form-id">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="exercise-name">Nombre del Ejercicio</label>
+                    <input type="text" id="exercise-name" class="form-input" placeholder="Ej. Dominadas supinas, Fondos, etc." required>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="exercise-muscle">Grupo Muscular Principal</label>
+                    <input type="text" id="exercise-muscle" class="form-input" placeholder="Ej. Espalda, Pecho, Piernas, Core...">
+                </div>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="exercise-desc">Descripción / Consejos</label>
+                    <textarea id="exercise-desc" class="form-input" placeholder="Detalles de ejecución o notas de técnica..." rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-muted" onclick="closeModal('exercise-catalog-modal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Ejercicio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Evolución y Detalle de Ejercicio (Ver Mejora) -->
+    <div class="modal-overlay" id="exercise-detail-modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="detail-ex-name" style="font-family: var(--font-display);">Dominadas</h3>
+                    <span id="detail-ex-muscle" class="exercise-card-muscle" style="margin-top: 0.4rem; display: inline-block;">Espalda</span>
+                </div>
+                <button class="icon-btn" onclick="closeModal('exercise-detail-modal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <p id="detail-ex-desc" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;"></p>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <h4 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; color: white;">
+                    Evolución y Progreso
+                </h4>
+                
+                <div class="chart-metrics-toggle">
+                    <button class="metric-toggle-btn active" onclick="switchChartMetric('total')">Reps Totales</button>
+                    <button class="metric-toggle-btn" onclick="switchChartMetric('max')">Max Reps en 1 Serie</button>
+                    <button class="metric-toggle-btn" onclick="switchChartMetric('sets')">Series Completadas</button>
+                </div>
+
+                <div class="chart-container-wrapper">
+                    <canvas id="progreso-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- NUEVO: Historial de Entrenamientos y Registro Bidireccional -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1.25rem; margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="font-family: var(--font-display); font-size: 1.1rem; color: white;">Sesiones Registradas</h4>
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openRegisterSeriesFromCatalog()">
+                        <i data-lucide="plus" style="width: 14px; height: 14px;"></i> + Registrar
+                    </button>
+                </div>
+
+                <!-- Formulario Rápido para registrar series en una sesión desde aquí -->
+                <div id="quick-register-series-container" style="display: none; flex-direction: column; gap: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border-color); padding: 1rem; border-radius: 12px;">
+                    <h5 style="font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; color: var(--color-accent);">Registrar Series</h5>
+                    <div class="form-group">
+                        <label for="catalog-session-select">Selecciona el Día / Sesión</label>
+                        <select id="catalog-session-select" class="form-input" required>
+                            <!-- Inyectado dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="series-builder" style="margin-top: 0.25rem; background: rgba(0,0,0,0.3);">
+                        <div class="series-builder-header">
+                            <h4 style="font-size: 0.85rem;">Series a Registrar</h4>
+                            <button type="button" class="btn btn-muted" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="addCatalogSeriesRow(null)">
+                                <i data-lucide="plus" style="width: 12px; height: 12px;"></i> + Serie
+                            </button>
+                        </div>
+                        <div id="catalog-series-rows-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 150px; overflow-y: auto;">
+                            <!-- Series rows -->
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.25rem;">
+                        <button type="button" class="btn btn-muted" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="toggleQuickRegisterForm(false)">Cancelar</button>
+                        <button type="button" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="saveSeriesFromCatalog()">Guardar en Sesión</button>
+                    </div>
+                </div>
+
+                <!-- Lista de historial -->
+                <div id="catalog-history-list" style="display: flex; flex-direction: column; gap: 0.6rem; max-height: 200px; overflow-y: auto; padding-right: 0.25rem;">
+                    <!-- Inyectado con JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- NOTIFICACIÓN TOAST --- -->
+    <div class="toast" id="toast-notif">
+        <span id="toast-icon-container">
+            <i data-lucide="check-circle" style="color: var(--color-success);"></i>
+        </span>
+        <span id="toast-message">Operación realizada con éxito</span>
+    </div>
+
+    <!-- --- JAVASCRIPT --- -->
+    <script>
+        // API URL
+        const API_URL = '/api';
+
+        // Estado global
+        let exercises = [];
+        let sessions = [];
+        let selectedSesionId = null;
+        let activeTab = 'sessions';
+        
+        // Gráficos
+        let myChart = null;
+        let rawChartData = [];
+        let activeChartMetric = 'total'; // 'total', 'max', 'sets'
+
+        // Inicialización
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+
+        async function initApp() {
+            lucide.createIcons();
+            // Cargar datos principales
+            await loadExercises();
+            await loadSessions();
+
+            // Si hay sesiones, seleccionar la primera (más reciente)
+            if (sessions.length > 0) {
+                selectSession(sessions[0].id);
+            }
+        }
+
+        // --- MANEJO DE VISTAS (TABS) ---
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+
+            const activeBtn = Array.from(document.querySelectorAll('.nav-tab-btn'))
+                .find(btn => btn.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const activeSection = document.getElementById(`${tabId}-view`);
+            if (activeSection) activeSection.classList.add('active');
+
+            if (tabId === 'exercises') {
+                renderExercisesCatalog();
+            } else {
+                loadSessions();
+            }
+        }
+
+        // --- MOSTRAR TOAST ---
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast-notif');
+            const msgEl = document.getElementById('toast-message');
+            const iconContainer = document.getElementById('toast-icon-container');
+            msgEl.textContent = message;
+            
+            if (!isSuccess) {
+                toast.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                toast.style.borderLeftColor = 'var(--color-danger)';
+                if (iconContainer) {
+                    iconContainer.innerHTML = `<i data-lucide="alert-circle" style="color: var(--color-danger);"></i>`;
+                }
+            } else {
+                toast.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                toast.style.borderLeftColor = 'var(--color-success)';
+                if (iconContainer) {
+                    iconContainer.innerHTML = `<i data-lucide="check-circle" style="color: var(--color-success);"></i>`;
+                }
+            }
+            
+            lucide.createIcons();
+
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // --- MODALES GENERALES ---
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // --- LOGICA DE EJERCICIOS ---
+        async function loadExercises() {
+            try {
+                const response = await fetch(`${API_URL}/ejercicios`);
+                exercises = await response.json();
+                populateExerciseDropdown();
+            } catch (error) {
+                console.error('Error cargando ejercicios:', error);
+                showToast('Error cargando el catálogo de ejercicios', false);
+            }
+        }
+
+        function populateExerciseDropdown() {
+            const dropdown = document.getElementById('session-ex-dropdown');
+            dropdown.innerHTML = '<option value="" disabled selected>-- Elige un ejercicio --</option>';
+            exercises.forEach(ex => {
+                dropdown.innerHTML += `<option value="${ex.id}">${ex.nombre} (${ex.grupoMuscular || 'General'})</option>`;
+            });
+        }
+
+        function renderExercisesCatalog() {
+            const grid = document.getElementById('exercises-catalog-grid');
+            grid.innerHTML = '';
+            
+            if (exercises.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i data-lucide="dumbbell"></i>
+                        <h2>Catálogo Vacío</h2>
+                        <p>No tienes ejercicios guardados. ¡Agrega tu primer ejercicio ahora mismo!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            exercises.forEach(ex => {
+                const card = document.createElement('div');
+                card.className = 'catalog-card';
+                card.onclick = () => openExerciseDetailModal(ex.id);
+                card.innerHTML = `
+                    <div class="catalog-card-header">
+                        <div>
+                            <div class="catalog-card-title">${ex.nombre}</div>
+                            <span class="exercise-card-muscle" style="margin-top: 0.35rem; display: inline-block;">
+                                ${ex.grupoMuscular || 'General'}
+                            </span>
+                        </div>
+                        <div class="exercise-card-actions" onclick="event.stopPropagation()">
+                            <button class="icon-btn" onclick="openEditExerciseModal(${ex.id})">
+                                <i data-lucide="edit-2" style="width: 15px; height: 15px;"></i>
+                            </button>
+                            <button class="icon-btn danger" onclick="deleteExercise(${ex.id})">
+                                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="catalog-card-desc">${ex.descripcion || 'Sin descripción detallada.'}</p>
+                    <div style="font-size: 0.8rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.4rem;">
+                        <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> Ver progreso y evolución
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openCreateExerciseModal() {
+            document.getElementById('exercise-modal-title').textContent = 'Nuevo Ejercicio';
+            document.getElementById('exercise-form-id').value = '';
+            document.getElementById('exercise-form').reset();
+            openModal('exercise-catalog-modal');
+        }
+
+        async function openEditExerciseModal(id) {
+            try {
+                const response = await fetch(`${API_URL}/ejercicios/${id}`);
+                const ex = await response.json();
+                
+                document.getElementById('exercise-modal-title').textContent = 'Editar Ejercicio';
+                document.getElementById('exercise-form-id').value = ex.id;
+                document.getElementById('exercise-name').value = ex.nombre;
+                document.getElementById('exercise-muscle').value = ex.grupoMuscular || '';
+                document.getElementById('exercise-desc').value = ex.descripcion || '';
+                
+                openModal('exercise-catalog-modal');
+            } catch (error) {
+                console.error(error);
+                showToast('No se pudo cargar el ejercicio', false);
+            }
+        }
+
+        async function saveExercise(e) {
+            e.preventDefault();
+            const id = document.getElementById('exercise-form-id').value;
+            const payload = {
+                nombre: document.getElementById('exercise-name').value,
+                grupoMuscular: document.getElementById('exercise-muscle').value,
+                descripcion: document.getElementById('exercise-desc').value
+            };
+
+            try {
+                let response;
+                if (id) {
+                    response = await fetch(`${API_URL}/ejercicios/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/ejercicios`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    throw new Error(errorMsg || 'Error guardando ejercicio');
+                }
+
+                showToast(id ? 'Ejercicio actualizado con éxito' : 'Ejercicio creado con éxito');
+                closeModal('exercise-catalog-modal');
+                await loadExercises();
+                if (activeTab === 'exercises') {
+                    renderExercisesCatalog();
+                }
+                if (selectedSesionId) {
+                    renderSessionDetail(selectedSesionId);
+                }
+            } catch (error) {
+                showToast(error.message, false);
+            }
+        }
+
+        async function deleteExercise(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este ejercicio? Se impedirá la eliminación si ya está registrado en entrenamientos.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/ejercicios/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('No se pudo eliminar. El ejercicio podría estar en uso en tus sesiones de entrenamiento.');
+                }
+
+                showToast('Ejercicio eliminado correctamente');
+                await loadExercises();
+                renderExercisesCatalog();
+            } catch (error) {
+                showToast(error.message, false);
+            }
+        }
+
+        // --- EVOLUCIÓN HISTÓRICA POR EJERCICIO ---
+        let activeCatalogExerciseId = null;
+
+        async function openExerciseDetailModal(ejercicioId) {
+            try {
+                activeCatalogExerciseId = ejercicioId;
+                toggleQuickRegisterForm(false);
+
+                const resEx = await fetch(`${API_URL}/ejercicios/${ejercicioId}`);
+                const ex = await resEx.json();
+
+                document.getElementById('detail-ex-name').textContent = ex.nombre;
+                document.getElementById('detail-ex-muscle').textContent = ex.grupoMuscular || 'General';
+                document.getElementById('detail-ex-desc').textContent = ex.descripcion || 'Sin descripción registrada.';
+
+                // Cargar datos de evolución e historial
+                await updateExerciseHistoryAndChart(ejercicioId);
+
+                openModal('exercise-detail-modal');
+                
+                // Esperar a que el modal se renderice para que la caja del gráfico tenga tamaño real
+                setTimeout(() => {
+                    renderProgressChart();
+                }, 150);
+            } catch (error) {
+                console.error(error);
+                showToast('Error al cargar historial de evolución', false);
+            }
+        }
+
+        async function updateExerciseHistoryAndChart(ejercicioId) {
+            // Recargar datos del gráfico
+            const resEv = await fetch(`${API_URL}/sesiones/ejercicio/${ejercicioId}/evolucion`);
+            rawChartData = await resEv.json();
+            renderProgressChart();
+
+            // Renderizar la lista de historial
+            renderExerciseHistoryList(ejercicioId);
+        }
+
+        function renderExerciseHistoryList(ejercicioId) {
+            const listContainer = document.getElementById('catalog-history-list');
+            listContainer.innerHTML = '';
+
+            // Filtrar sesiones que contienen este ejercicio
+            const matchingSessions = sessions.filter(s => 
+                s.series && s.series.some(sr => sr.ejercicioId === ejercicioId)
+            );
+
+            if (matchingSessions.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="text-align: center; color: var(--text-dark); font-size: 0.85rem; padding: 1.5rem 0; border: 1px dashed var(--border-color); border-radius: 10px;">
+                        No registrado en ninguna sesión todavía.
+                    </div>
+                `;
+                return;
+            }
+
+            matchingSessions.forEach(s => {
+                const srList = s.series.filter(sr => sr.ejercicioId === ejercicioId);
+                const repsStr = srList.map(sr => sr.repeticiones).join(' / ');
+                
+                const item = document.createElement('div');
+                item.className = 'session-item';
+                item.style.padding = '0.75rem 1rem';
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                
+                item.innerHTML = `
+                    <div>
+                        <div class="session-item-date" style="font-size: 0.9rem; margin-bottom: 0; color: white;">
+                            ${formatDateStr(s.fecha)}
+                        </div>
+                        <div class="session-item-summary" style="font-size: 0.8rem;">
+                            Series: ${repsStr}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.25rem;">
+                        <button class="icon-btn" style="width: 30px; height: 30px;" onclick="event.stopPropagation(); editSeriesFromCatalog(${s.id}, ${ejercicioId}, [${srList.map(sr => sr.repeticiones).join(',')}])">
+                            <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="icon-btn danger" style="width: 30px; height: 30px;" onclick="event.stopPropagation(); deleteSeriesFromCatalog(${s.id}, ${ejercicioId})">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function editSeriesFromCatalog(sessionId, ejercicioId, repsArray) {
+            closeModal('exercise-detail-modal');
+            // Seleccionar la sesión y cargarla en la pestaña
+            selectSession(sessionId);
+            // Abrir el modal de edición de series
+            openEditExerciseInSessionModal(ejercicioId, repsArray);
+        }
+
+        async function deleteSeriesFromCatalog(sessionId, ejercicioId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar todas las series de este ejercicio en ese día?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/sesiones/${sessionId}/ejercicios/${ejercicioId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify([])
+                });
+
+                if (!response.ok) throw new Error();
+
+                showToast('Ejercicio eliminado del entrenamiento');
+                
+                // Recargar todos los datos
+                await loadSessions();
+                
+                // Actualizar el detalle del ejercicio
+                await updateExerciseHistoryAndChart(ejercicioId);
+            } catch (error) {
+                showToast('Error al eliminar ejercicio del entrenamiento', false);
+            }
+        }
+
+        function openRegisterSeriesFromCatalog() {
+            // Rellenar las sesiones en el select
+            const select = document.getElementById('catalog-session-select');
+            select.innerHTML = '<option value="" disabled selected>-- Selecciona un día --</option>';
+            select.innerHTML += '<option value="new_session">+ Nueva Sesión de Entrenamiento (Hoy)</option>';
+            
+            // Ordenar por fecha desc
+            sessions.forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${formatDateStr(s.fecha)} — ${s.notes || s.notas || 'Sin notas'}</option>`;
+            });
+
+            // Limpiar series
+            const rowsContainer = document.getElementById('catalog-series-rows-container');
+            rowsContainer.innerHTML = '';
+            addCatalogSeriesRow(10);
+            addCatalogSeriesRow(8);
+            addCatalogSeriesRow(6);
+
+            toggleQuickRegisterForm(true);
+        }
+
+        function toggleQuickRegisterForm(show) {
+            const container = document.getElementById('quick-register-series-container');
+            container.style.display = show ? 'flex' : 'none';
+        }
+
+        function addCatalogSeriesRow(defaultValue = null) {
+            const container = document.getElementById('catalog-series-rows-container');
+            const rowCount = container.children.length + 1;
+            const value = defaultValue !== null ? defaultValue : 10;
+            
+            const row = document.createElement('div');
+            row.className = 'series-row';
+            row.style.padding = '0.4rem 0.8rem';
+            row.innerHTML = `
+                <span class="series-row-label" style="font-size: 0.85rem;">Serie #${rowCount}</span>
+                <div class="series-counter">
+                    <button type="button" class="counter-btn" style="width: 26px; height: 26px; font-size: 0.95rem;" onclick="updateCounter(this, -1)">-</button>
+                    <input type="number" class="counter-input catalog-serie-rep-val" style="width: 40px; font-size: 0.95rem; background: transparent; border: none; color: white; text-align: center;" value="${value}" min="1" max="999">
+                    <button type="button" class="counter-btn" style="width: 26px; height: 26px; font-size: 0.95rem;" onclick="updateCounter(this, 1)">+</button>
+                </div>
+                <button type="button" class="icon-btn danger" style="width: 24px; height: 24px; border-radius: 6px;" onclick="removeCatalogSeriesRow(this)">
+                    <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                </button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons();
+            reorderCatalogSeriesRows();
+        }
+
+        function removeCatalogSeriesRow(btn) {
+            const row = btn.closest('.series-row');
+            row.remove();
+            reorderCatalogSeriesRows();
+        }
+
+        function reorderCatalogSeriesRows() {
+            const container = document.getElementById('catalog-series-rows-container');
+            Array.from(container.children).forEach((row, index) => {
+                row.querySelector('.series-row-label').textContent = `Serie #${index + 1}`;
+            });
+        }
+
+        async function saveSeriesFromCatalog() {
+            const sessionSelectValue = document.getElementById('catalog-session-select').value;
+            if (!sessionSelectValue) {
+                showToast('Por favor, selecciona una sesión', false);
+                return;
+            }
+
+            // Recoger repeticiones
+            const inputs = document.querySelectorAll('.catalog-serie-rep-val');
+            const repeticiones = [];
+            inputs.forEach(input => {
+                const val = parseInt(input.value);
+                if (val > 0) {
+                    repeticiones.push(val);
+                }
+            });
+
+            if (repeticiones.length === 0) {
+                showToast('Debes registrar al menos una serie', false);
+                return;
+            }
+
+            try {
+                let sessionId;
+                if (sessionSelectValue === 'new_session') {
+                    // Crear sesión primero
+                    const newSessionPayload = {
+                        fecha: new Date().toISOString().split('T')[0],
+                        notas: 'Sesión creada desde catálogo de ejercicios'
+                    };
+                    const resSession = await fetch(`${API_URL}/sesiones`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newSessionPayload)
+                    });
+                    if (!resSession.ok) throw new Error('No se pudo crear la nueva sesión');
+                    const createdSession = await resSession.json();
+                    sessionId = createdSession.id;
+                } else {
+                    sessionId = parseInt(sessionSelectValue);
+                }
+
+                // Guardar las series en la sesión
+                const response = await fetch(`${API_URL}/sesiones/${sessionId}/ejercicios/${activeCatalogExerciseId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(repeticiones)
+                });
+
+                if (!response.ok) throw new Error('Error al guardar series');
+
+                showToast('Series registradas correctamente en el entrenamiento');
+                toggleQuickRegisterForm(false);
+                
+                // Recargar todos los datos
+                await loadSessions();
+                
+                // Actualizar el detalle de evolución y la lista de historial
+                await updateExerciseHistoryAndChart(activeCatalogExerciseId);
+            } catch (error) {
+                showToast(error.message, false);
+            }
+        }
+
+        function switchChartMetric(metric) {
+            activeChartMetric = metric;
+            document.querySelectorAll('.metric-toggle-btn').forEach(btn => btn.classList.remove('active'));
+            
+            const activeBtn = Array.from(document.querySelectorAll('.metric-toggle-btn'))
+                .find(btn => btn.getAttribute('onclick').includes(metric));
+            if (activeBtn) activeBtn.classList.add('active');
+
+            renderProgressChart();
+        }
+
+        function renderProgressChart() {
+            const ctx = document.getElementById('progreso-chart').getContext('2d');
+            
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            if (rawChartData.length === 0) {
+                // Dibujar estado vacío en el canvas
+                ctx.clearRect(0, 0, 400, 300);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '14px Outfit';
+                ctx.textAlign = 'center';
+                ctx.fillText('Aún no has registrado series de este ejercicio', 300, 140);
+                ctx.fillText('para generar estadísticas.', 300, 160);
+                return;
+            }
+
+            // Mapeo cronológico
+            const labels = rawChartData.map(d => formatDateStr(d.fecha));
+            
+            let data = [];
+            let labelText = '';
+            let borderCol = '#6366f1';
+            let bgCol = 'rgba(99, 102, 241, 0.1)';
+
+            if (activeChartMetric === 'total') {
+                data = rawChartData.map(d => d.totalRepeticiones);
+                labelText = 'Repeticiones Acumuladas';
+                borderCol = '#10b981';
+                bgCol = 'rgba(16, 185, 129, 0.08)';
+            } else if (activeChartMetric === 'max') {
+                data = rawChartData.map(d => d.maxRepeticiones);
+                labelText = 'Mejor Serie (Repeticiones Máximas)';
+                borderCol = '#06b6d4';
+                bgCol = 'rgba(6, 182, 212, 0.08)';
+            } else if (activeChartMetric === 'sets') {
+                data = rawChartData.map(d => d.totalSeries);
+                labelText = 'Series Totales';
+                borderCol = '#a5b4fc';
+                bgCol = 'rgba(165, 180, 252, 0.08)';
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelText,
+                        data: data,
+                        borderColor: borderCol,
+                        backgroundColor: bgCol,
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: borderCol,
+                        pointBorderColor: 'white',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#f3f4f6',
+                                font: { family: 'Outfit', size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#9ca3af', font: { family: 'Plus Jakarta Sans' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { family: 'Plus Jakarta Sans' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- LÓGICA DE SESIONES ---
+        async function loadSessions() {
+            try {
+                const response = await fetch(`${API_URL}/sesiones`);
+                sessions = await response.json();
+                renderSessionsSidebar();
+                
+                // Si la sesión seleccionada ya no existe o no hay ninguna seleccionada
+                if (selectedSesionId && !sessions.find(s => s.id === selectedSesionId)) {
+                    selectedSesionId = null;
+                }
+                
+                if (selectedSesionId) {
+                    renderSessionDetail(selectedSesionId);
+                } else if (sessions.length > 0) {
+                    selectSession(sessions[0].id);
+                } else {
+                    document.getElementById('session-detail-container').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="calendar" style="width: 40px; height: 40px;"></i>
+                            </div>
+                            <h2>Sin Sesiones Guardadas</h2>
+                            <p>No tienes entrenamientos registrados en el sistema. ¡Empieza creando tu primer día!</p>
+                            <button class="btn btn-primary" onclick="openCreateSessionModal()">
+                                <i data-lucide="plus"></i> Crear Sesión
+                            </button>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Error cargando historial de sesiones', false);
+            }
+        }
+
+        function renderSessionsSidebar() {
+            const listContainer = document.getElementById('sessions-sidebar-list');
+            listContainer.innerHTML = '';
+
+            if (sessions.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="text-align: center; color: var(--text-dark); font-size: 0.85rem; padding: 2rem 0;">
+                        No hay entrenamientos
+                    </div>
+                `;
+                return;
+            }
+
+            sessions.forEach(s => {
+                const item = document.createElement('div');
+                item.className = `session-item ${selectedSesionId === s.id ? 'selected' : ''}`;
+                item.onclick = () => selectSession(s.id);
+                
+                // Generar pequeño sumario
+                let summaryText = s.notas || 'Sin anotaciones';
+                if (s.series && s.series.length > 0) {
+                    // Agrupar series por ejercicio para el resumen
+                    const grouped = {};
+                    s.series.forEach(sr => {
+                        grouped[sr.ejercicioNombre] = (grouped[sr.ejercicioNombre] || 0) + 1;
+                    });
+                    summaryText = Object.keys(grouped).slice(0, 2).map(name => `${name} (${grouped[name]}s)`).join(', ');
+                }
+
+                item.innerHTML = `
+                    <div class="session-item-date">${formatDateStr(s.fecha)}</div>
+                    <div class="session-item-summary">${summaryText}</div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function selectSession(id) {
+            selectedSesionId = id;
+            
+            // Actualizar clase seleccionada en el sidebar
+            document.querySelectorAll('.session-item').forEach(item => item.classList.remove('selected'));
+            renderSessionsSidebar();
+
+            renderSessionDetail(id);
+        }
+
+        async function renderSessionDetail(id) {
+            const container = document.getElementById('session-detail-container');
+            
+            try {
+                const response = await fetch(`${API_URL}/sesiones/${id}`);
+                if (!response.ok) throw new Error();
+                const session = await response.json();
+
+                // Agrupar las series por ejercicio
+                const groupedExercises = {};
+                session.series.forEach(serie => {
+                    if (!groupedExercises[serie.ejercicioId]) {
+                        groupedExercises[serie.ejercicioId] = {
+                            ejercicioId: serie.ejercicioId,
+                            ejercicioNombre: serie.ejercicioNombre,
+                            repeticiones: []
+                        };
+                    }
+                    groupedExercises[serie.ejercicioId].repeticiones.push(serie.repeticiones);
+                });
+
+                let exercisesHtml = '';
+                const entries = Object.values(groupedExercises);
+                
+                if (entries.length === 0) {
+                    exercisesHtml = `
+                        <div style="text-align: center; padding: 3rem 1rem; border: 1px dashed var(--border-color); border-radius: 16px; color: var(--text-muted);">
+                            <i data-lucide="plus-square" style="width: 32px; height: 32px; color: var(--text-dark); margin-bottom: 0.75rem;"></i>
+                            <p style="font-size: 0.95rem;">Aún no has registrado ejercicios para este día.</p>
+                            <button class="btn btn-muted" style="margin-top: 1rem; font-size: 0.85rem;" onclick="openAddExerciseToSessionModal()">
+                                Agregar Ejercicio
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    exercisesHtml = '<div class="session-exercises-grid">';
+                    entries.forEach(entry => {
+                        // Buscar el grupo muscular en nuestro listado local para mostrarlo
+                        const localEx = exercises.find(ex => ex.id === entry.ejercicioId);
+                        const muscleGroup = localEx ? localEx.grupoMuscular : 'General';
+                        
+                        exercisesHtml += `
+                            <div class="session-exercise-card" onclick="openEditExerciseInSessionModal(${entry.ejercicioId}, ${JSON.stringify(entry.repeticiones).replace(/"/g, '&quot;')})">
+                                <div class="exercise-card-left">
+                                    <div class="exercise-card-name" onclick="event.stopPropagation(); openExerciseDetailModal(${entry.ejercicioId})">
+                                        ${entry.ejercicioNombre}
+                                        <i data-lucide="trending-up" style="width: 16px; height: 16px; color: var(--color-accent);"></i>
+                                    </div>
+                                    <span class="exercise-card-muscle">${muscleGroup || 'General'}</span>
+                                    <div class="exercise-card-series-inline">
+                                        ${entry.repeticiones.map((rep, idx) => `
+                                            <span class="series-rep-badge">${rep}</span>
+                                            ${idx < entry.repeticiones.length - 1 ? '<span class="series-divider">/</span>' : ''}
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div class="exercise-card-actions" onclick="event.stopPropagation()">
+                                    <button class="icon-btn danger" onclick="deleteExerciseFromSession(${entry.ejercicioId})">
+                                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    exercisesHtml += '</div>';
+                }
+
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 2rem;">
+                        <div class="session-detail-header">
+                            <div class="session-header-top">
+                                <div class="session-title-container">
+                                    <h1>Sesión — ${formatDateStr(session.fecha)}</h1>
+                                    <span style="font-size: 0.8rem; color: var(--text-dark);">
+                                        ID de entrenamiento: #${session.id}
+                                    </span>
+                                </div>
+                                <div class="session-actions-top">
+                                    <button class="icon-btn" onclick="openEditSessionModal(${session.id})">
+                                        <i data-lucide="edit-2"></i>
+                                    </button>
+                                    <button class="icon-btn danger" onclick="deleteSession(${session.id})">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <textarea class="session-notes-box" placeholder="Añade notas sobre este entrenamiento aquí... (ej. clima, cómo te sentiste, barra usada)" onblur="saveSessionNotes(${session.id}, this.value)" rows="2">${session.notas || ''}</textarea>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600;">Ejercicios Realizados</h2>
+                                <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="openAddExerciseToSessionModal()">
+                                    <i data-lucide="plus"></i> Agregar Ejercicio
+                                </button>
+                            </div>
+                            
+                            ${exercisesHtml}
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="alert-triangle" style="color: var(--color-danger);"></i>
+                        <h2>Error al Cargar</h2>
+                        <p>No pudimos cargar la información de la sesión seleccionada.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // --- CREAR / EDITAR METADATOS DE SESION ---
+        function openCreateSessionModal() {
+            document.getElementById('session-modal-title').textContent = 'Nueva Sesión de Entrenamiento';
+            document.getElementById('session-form-id').value = '';
+            document.getElementById('session-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('session-notes').value = '';
+            openModal('session-modal');
+        }
+
+        function openEditSessionModal(id) {
+            const session = sessions.find(s => s.id === id);
+            if (!session) return;
+            document.getElementById('session-modal-title').textContent = 'Editar Metadatos del Día';
+            document.getElementById('session-form-id').value = id;
+            document.getElementById('session-date').value = session.fecha;
+            document.getElementById('session-notes').value = session.notas || '';
+            openModal('session-modal');
+        }
+
+        async function saveSession(e) {
+            e.preventDefault();
+            const id = document.getElementById('session-form-id').value;
+            const payload = {
+                fecha: document.getElementById('session-date').value,
+                notas: document.getElementById('session-notes').value
+            };
+
+            try {
+                let response;
+                if (id) {
+                    response = await fetch(`${API_URL}/sesiones/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/sesiones`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (!response.ok) throw new Error();
+                const session = await response.json();
+                
+                showToast(id ? 'Día de entrenamiento actualizado' : 'Día de entrenamiento registrado');
+                closeModal('session-modal');
+                selectedSesionId = session.id;
+                await loadSessions();
+            } catch (error) {
+                showToast('Error al registrar la sesión', false);
+            }
+        }
+
+        async function saveSessionNotes(id, notes) {
+            try {
+                const response = await fetch(`${API_URL}/sesiones/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notas: notes })
+                });
+                if (response.ok) {
+                    showToast('Notas del entrenamiento guardadas');
+                    // Actualizar silenciosamente en nuestra lista local
+                    const idx = sessions.findIndex(s => s.id === id);
+                    if (idx !== -1) {
+                        sessions[idx].notes = notes;
+                    }
+                    renderSessionsSidebar();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function deleteSession(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este día de entrenamiento? Se borrarán permanentemente todas las series registradas en él.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/sesiones/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error();
+
+                showToast('Sesión eliminada con éxito');
+                selectedSesionId = null;
+                await loadSessions();
+            } catch (error) {
+                showToast('Error al eliminar la sesión', false);
+            }
+        }
+
+        // --- GESTIÓN DE SERIES DE EJERCICIO EN SESIÓN (SERIES BUILDER) ---
+        let currentSeriesList = [];
+
+        function openAddExerciseToSessionModal() {
+            document.getElementById('session-ex-dropdown').disabled = false;
+            document.getElementById('session-ex-dropdown').value = '';
+            updateQuickEditButtonState();
+            
+            const qContainer = document.getElementById('quick-exercise-form-container');
+            if (qContainer) qContainer.style.display = 'none';
+
+            const container = document.getElementById('series-rows-container');
+            container.innerHTML = '';
+            
+            // Empezar con 3 series por defecto (vacías)
+            addSeriesRow(10);
+            addSeriesRow(8);
+            addSeriesRow(6);
+
+            openModal('add-exercise-to-session-modal');
+        }
+
+        function openEditExerciseInSessionModal(ejercicioId, repsArray) {
+            // Fijar el dropdown del ejercicio
+            const dropdown = document.getElementById('session-ex-dropdown');
+            dropdown.value = ejercicioId;
+            dropdown.disabled = true;
+            updateQuickEditButtonState();
+
+            const qContainer = document.getElementById('quick-exercise-form-container');
+            if (qContainer) qContainer.style.display = 'none';
+
+            const container = document.getElementById('series-rows-container');
+            container.innerHTML = '';
+
+            repsArray.forEach(reps => {
+                addSeriesRow(reps);
+            });
+
+            openModal('add-exercise-to-session-modal');
+        }
+
+        function toggleQuickExerciseForm(forceShow = null) {
+            const container = document.getElementById('quick-exercise-form-container');
+            const isVisible = forceShow !== null ? forceShow : (container.style.display === 'flex');
+            
+            if (isVisible) {
+                container.style.display = 'none';
+            } else {
+                container.style.display = 'flex';
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        async function saveQuickExercise() {
+            const nombre = document.getElementById('quick-ex-name').value.trim();
+            const grupoMuscular = document.getElementById('quick-ex-muscle').value.trim();
+            const descripcion = document.getElementById('quick-ex-desc').value.trim();
+
+            if (!nombre) {
+                showToast('El nombre del ejercicio es obligatorio', false);
+                return;
+            }
+
+            const payload = { nombre, grupoMuscular, descripcion };
+
+            try {
+                const response = await fetch(`${API_URL}/ejercicios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    throw new Error(errorMsg || 'Error al crear el ejercicio');
+                }
+
+                const nuevoEx = await response.json();
+                showToast('Ejercicio creado y seleccionado');
+                
+                // Recargar catálogo local
+                await loadExercises();
+                
+                // Cerrar formulario rápido y resetearlo
+                toggleQuickExerciseForm(false);
+                document.getElementById('quick-ex-name').value = '';
+                document.getElementById('quick-ex-muscle').value = '';
+                document.getElementById('quick-ex-desc').value = '';
+
+                // Seleccionar automáticamente el nuevo ejercicio
+                document.getElementById('session-ex-dropdown').value = nuevoEx.id;
+                // Mostrar botón de edición maestro
+                updateQuickEditButtonState();
+            } catch (error) {
+                showToast(error.message, false);
+            }
+        }
+
+        function updateQuickEditButtonState() {
+            const dropdown = document.getElementById('session-ex-dropdown');
+            const editBtn = document.getElementById('btn-quick-edit-ex');
+            if (dropdown && dropdown.value) {
+                editBtn.style.display = 'flex';
+            } else {
+                editBtn.style.display = 'none';
+            }
+        }
+
+        function openEditExerciseFromSession() {
+            const dropdown = document.getElementById('session-ex-dropdown');
+            if (dropdown && dropdown.value) {
+                const exerciseId = parseInt(dropdown.value);
+                closeModal('add-exercise-to-session-modal');
+                openEditExerciseModal(exerciseId);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdown = document.getElementById('session-ex-dropdown');
+            if (dropdown) {
+                dropdown.addEventListener('change', updateQuickEditButtonState);
+            }
+
+            // Cerrar modales al hacer click en el overlay (fuera del recuadro)
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal(overlay.id);
+                    }
+                });
+            });
+        });
+
+        function addSeriesRow(defaultValue = null) {
+            const container = document.getElementById('series-rows-container');
+            const rowCount = container.children.length + 1;
+            
+            const value = defaultValue !== null ? defaultValue : 10;
+            
+            const row = document.createElement('div');
+            row.className = 'series-row';
+            row.innerHTML = `
+                <span class="series-row-label">Serie #${rowCount}</span>
+                <div class="series-counter">
+                    <button type="button" class="counter-btn" onclick="updateCounter(this, -1)">-</button>
+                    <input type="number" class="counter-input serie-rep-val" value="${value}" min="1" max="999">
+                    <button type="button" class="counter-btn" onclick="updateCounter(this, 1)">+</button>
+                </div>
+                <button type="button" class="icon-btn danger" style="width: 28px; height: 28px; border-radius: 6px;" onclick="removeSeriesRow(this)">
+                    <i data-lucide="x" style="width: 13px; height: 13px;"></i>
+                </button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons();
+            reorderSeriesRows();
+        }
+
+        function removeSeriesRow(btn) {
+            const row = btn.closest('.series-row');
+            row.remove();
+            reorderSeriesRows();
+        }
+
+        function reorderSeriesRows() {
+            const container = document.getElementById('series-rows-container');
+            Array.from(container.children).forEach((row, index) => {
+                row.querySelector('.series-row-label').textContent = `Serie #${index + 1}`;
+            });
+        }
+
+        function updateCounter(btn, increment) {
+            const input = btn.parentNode.querySelector('.serie-rep-val');
+            let val = parseInt(input.value) || 0;
+            val = val + increment;
+            if (val < 1) val = 1;
+            input.value = val;
+        }
+
+        async function saveSeriesForExercise(e) {
+            e.preventDefault();
+            
+            const exerciseId = document.getElementById('session-ex-dropdown').value;
+            if (!exerciseId) {
+                showToast('Por favor, selecciona un ejercicio', false);
+                return;
+            }
+
+            // Recoger los valores de repeticiones
+            const inputs = document.querySelectorAll('.serie-rep-val');
+            const repeticiones = [];
+            inputs.forEach(input => {
+                const val = parseInt(input.value);
+                if (val > 0) {
+                    repeticiones.push(val);
+                }
+            });
+
+            if (repeticiones.length === 0) {
+                showToast('Debes registrar al menos una serie con repeticiones', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/sesiones/${selectedSesionId}/ejercicios/${exerciseId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(repeticiones)
+                });
+
+                if (!response.ok) throw new Error();
+
+                showToast('Ejercicio registrado en la sesión');
+                closeModal('add-exercise-to-session-modal');
+                renderSessionDetail(selectedSesionId);
+            } catch (error) {
+                showToast('Error al registrar series del ejercicio', false);
+            }
+        }
+
+        async function deleteExerciseFromSession(exerciseId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar todas las series de este ejercicio en este día?')) {
+                return;
+            }
+
+            try {
+                // Para eliminar todas las series del ejercicio, enviamos una lista vacía
+                const response = await fetch(`${API_URL}/sesiones/${selectedSesionId}/ejercicios/${exerciseId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify([])
+                });
+
+                if (!response.ok) throw new Error();
+
+                showToast('Ejercicio eliminado del entrenamiento');
+                renderSessionDetail(selectedSesionId);
+            } catch (error) {
+                showToast('Error al eliminar ejercicio del entrenamiento', false);
+            }
+        }
+
+        // --- UTILIDADES ---
+        function formatDateStr(dateString) {
+            if (!dateString) return '';
+            
+            // Prevenir desfases horarios de zona en conversiones locales
+            const parts = dateString.split('-');
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            
+            const opciones = { day: 'numeric', month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('es-ES', opciones);
+        }
+    </script>
+</body>
+</html>
